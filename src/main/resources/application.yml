@@ -1,0 +1,31 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+        generate_statistics: true
+        show_sql: true
+        jdbc:
+          batch_size: 50
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+  application:
+    name: vagabond-user-server
+  rabbitmq:
+    host: localhost
+    port: 5673
+server:
+  port: 8102
+rabbit:
+  exchange:
+    name: vagabond
+  queue:
+    login: vagabond-login-queue
+    user: vagabond-user-queue
+  key:
+    login: vagabond-login-key
+    user: vagabond-login-user
+
