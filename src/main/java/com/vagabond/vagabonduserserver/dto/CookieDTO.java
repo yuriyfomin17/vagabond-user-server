@@ -1,13 +1,16 @@
 package com.vagabond.vagabonduserserver.dto;
 
 public record CookieDTO(
-        String name,
-        String value,
         String domain,
+        double expirationDate,
+        boolean hostOnly,
+        String name,
         String path,
-        long expiry,
-        boolean isSecure,
-        boolean isHttpOnly,
-        String sameSite
+        String sameSite,
+        boolean secure,
+        boolean session,
+        String storeId,
+        String value,
+        String id
 ) {
 }

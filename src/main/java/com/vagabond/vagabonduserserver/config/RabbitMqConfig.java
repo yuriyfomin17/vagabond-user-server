@@ -15,14 +15,8 @@ public class RabbitMqConfig {
 
     @Value("${rabbit.queue.login}")
     private String loginQueueName;
-
-    @Value("${rabbit.queue.user}")
-    private String userQueueName;
     @Value("${rabbit.key.login}")
     private String loginRoutingKey;
-
-    @Value("${rabbit.key.user}")
-    private String userRoutingKey;
 
     @Bean
     public Binding loginBinding() {
@@ -43,22 +37,6 @@ public class RabbitMqConfig {
     public Exchange exchange() {
         return ExchangeBuilder
                 .directExchange(exchangeName)
-                .build();
-    }
-
-    @Bean
-    public Binding userBinding() {
-        return BindingBuilder
-                .bind(userQueue())
-                .to(exchange())
-                .with(userRoutingKey)
-                .noargs();
-    }
-
-    @Bean
-    public Queue userQueue() {
-        return QueueBuilder
-                .durable(userQueueName)
                 .build();
     }
 

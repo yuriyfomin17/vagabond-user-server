@@ -8,6 +8,7 @@ import com.vagabond.vagabonduserserver.repo.UserRepository;
 import com.vagabond.vagabonduserserver.util.DtoConverter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AccountService {
 
     private final AccountRepository accountRepository;
@@ -31,36 +34,38 @@ public class AccountService {
     private String loginRoutingKey;
 
     @Transactional
-    public AccountDTO saveNewAccount(Long userId, AccountDTO accountDTO) {
+    public Account saveNewAccount(Long userId, AccountDTO accountDTO) {
         User userReference = userRepository.getReferenceById(userId);
-        Account account = DtoConverter.createAccount(accountDTO);
-        account.setUser(userReference);
-        Account savedAccount = accountRepository.save(account);
-        asyncVerifyAccount(savedAccount);
-        return DtoConverter.createAccountDTO(savedAccount);
+        Account accountToSave = DtoConverter.createAccount(accountDTO);
+        accountToSave.setUser(userReference);
+        accountRepository.save(accountToSave);
+        return accountToSave;
+
     }
 
-    private void asyncVerifyAccount(Account account) {
-        LoginDTO loginDTO = DtoConverter.getLoginDTO(account);
-        List<CookieDTO> cookieDTOS = DtoConverter.getCookieDTOS(account.getSerializedCookies());
-        CookiesDTO cookiesDTO = new CookiesDTO(cookieDTOS);
-        CommandDTO commandDTO = new CommandDTO(account.getId(), loginDTO, cookiesDTO);
-        rabbitTemplate.convertAndSend(exchangeName, loginRoutingKey, commandDTO);
+    public void asyncVerifyAccount(Account account) {
+        if (Objects.nonNull(account) && Objects.nonNull(account.getId())) {
+            LoginDTO loginDTO = DtoConverter.getLoginDTO(account);
+            List<CookieDTO> cookieDTOS = DtoConverter.getCookieDTOS(account.getSerializedCookies());
+            CommandDTO commandDTO = new CommandDTO(account.getId(), loginDTO, cookieDTOS);
+            rabbitTemplate.convertAndSend(exchangeName, loginRoutingKey, commandDTO);
+        }
     }
 
     @Transactional
-    public void saveMultipleAccounts(Long userId, MultipleAccountsDTO multipleAccountsDTO) {
+    public List<Account> saveMultipleAccounts(Long userId, MultipleAccountsDTO multipleAccountsDTO) {
         List<AccountDTO> accountDTOList = multipleAccountsDTO.accountDTOList();
         User userReference = userRepository.getReferenceById(userId);
         List<Account> accountListToSave = new ArrayList<>();
         accountDTOList.forEach(accountDTO -> handleAccountDTO(userReference, accountListToSave, accountDTO));
         accountRepository.saveAll(accountListToSave);
+        return accountListToSave;
     }
+
     private void handleAccountDTO(User userReference, List<Account> accountListToSave, AccountDTO accountDTO) {
         Account account = DtoConverter.createAccount(accountDTO);
         account.setUser(userReference);
         accountListToSave.add(account);
-        asyncVerifyAccount(account);
     }
 
     @Transactional

@@ -62,6 +62,8 @@ public class DtoConverter {
                 .email(account.getEmail())
                 .password(account.getPassword())
                 .proxy(account.getProxy())
+                .active(account.getActive())
+                .eaabToken(account.getEaabToken())
                 .cookies(cookieDTOS)
                 .build();
     }

@@ -24,8 +24,6 @@ rabbit:
     name: vagabond
   queue:
     login: vagabond-login-queue
-    user: vagabond-user-queue
   key:
     login: vagabond-login-key
-    user: vagabond-login-user
 

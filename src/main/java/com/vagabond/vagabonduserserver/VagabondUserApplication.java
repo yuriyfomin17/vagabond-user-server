@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class VagabondApplication {
+public class VagabondUserApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(VagabondApplication.class, args);
+		SpringApplication.run(VagabondUserApplication.class, args);
 	}
 
 }
